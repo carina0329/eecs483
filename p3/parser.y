@@ -1,12 +1,6 @@
 /* File: parser.y
  * --------------
  * Yacc input file to generate the parser for the compiler.
- *
- * pp3: add parser rules and tree construction from your pp2. You should
- *      not need to make any significant changes in the parser itself. After
- *      parsing completes, if no syntax errors were found, the parser calls
- *      program->Check() to kick off the semantic analyzer pass. The
- *      interesting work happens during the tree traversal.
  */
 
 %{
@@ -78,9 +72,7 @@ void yyerror(const char *msg); // standard error-handling routine
 %type <stmt>      Stmt StmtBlock OptElse
 %type <stmtList>  StmtList
 
-
-
-
+  
 /* Precedence and associativity
  * ----------------------------
  * Here we establish the precedence and associativity of the
@@ -93,10 +85,11 @@ void yyerror(const char *msg); // standard error-handling routine
 %nonassoc  '<' '>' T_LessEqual T_GreaterEqual
 %left      '+' '-'
 %left      '*' '/' '%'  
-%nonassoc  T_UnaryMinus '!' T_Increm T_Decrem
+%nonassoc  T_UnaryMinus '!' 
 %nonassoc  '.' '['
 %nonassoc  T_Lower_Than_Else
 %nonassoc  T_Else
+
 %%
 /* Rules
  * -----
@@ -107,7 +100,7 @@ Program   :    DeclList            {
                                       Program *program = new Program($1);
                                       // if no errors, advance to next phase
                                       if (ReportError::NumErrors() == 0) 
-                                          program->Check();
+                                          program->Check(); 
                                     }
           ;
 
@@ -266,8 +259,6 @@ Expr      :    LValue               { $$ = $1; }
           |    T_NewArray '(' Expr ',' Type ')' 
                                     { $$ = new NewArrayExpr(Join(@1,@6),$3, $5); }
           |    T_This               { $$ = new This(@1); }
-          |    LValue T_Increm      { $$ = new PostfixExpr($1, new Operator(@2, "++")); }
-          |    LValue T_Decrem      { $$ = new PostfixExpr($1, new Operator(@2, "--")); }
           ;
 
 Constant  :    T_IntConstant        { $$ = new IntConstant(@1,$1); }
@@ -289,10 +280,6 @@ OptElse   :    T_Else Stmt          { $$ = $2; }
           |    /* empty */   %prec T_Lower_Than_Else 
                                     { $$ = NULL; }
           ;
-
-
-
-
 
 %%
 
