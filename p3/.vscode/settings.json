@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "ast_expr.h": "c",
+        "ast_stmt.h": "c"
+    }
+}
